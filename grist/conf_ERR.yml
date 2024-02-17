@@ -1,0 +1,9 @@
+samples:
+- ERR505104
+
+outdir: outputs.onehuman/
+metagenome_trim_memory: 50e9
+
+sourmash_databases:
+- gtdb-rs214-k31.zip
+
