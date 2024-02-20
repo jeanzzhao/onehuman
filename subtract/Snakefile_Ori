@@ -1,3 +1,4 @@
+# absolute path
 PAIRS, = glob_wildcards('/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/mapping/{pair}.mapped.fq.gz')
 # then PAIRS would be [ "ERRXYZ.x.genomeABC", "ERRXYZ.x.genomeDEF"]
 print(PAIRS)
