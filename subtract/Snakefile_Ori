@@ -1,4 +1,4 @@
-PAIRS, = glob_wildcards('../grist/outputs/mapping/{pair}.mapped.fq.gz')
+PAIRS, = glob_wildcards('/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/mapping/{pair}.mapped.fq.gz')
 # then PAIRS would be [ "ERRXYZ.x.genomeABC", "ERRXYZ.x.genomeDEF"]
 print(PAIRS)
 
@@ -9,7 +9,7 @@ rule all:
 # MEGAHIT assemble mapped reads
 rule mapped_assembly:
     input:
-        mapped_reads="../grist/outputs/mapping/{metagenome}.x.{genome}.mapped.fq.gz",
+        mapped_reads="/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/mapping/{metagenome}.x.{genome}.mapped.fq.gz",
 
     output:
         mapped_assembly= "{metagenome}.x.{genome}.mapped.assembly.fa",
@@ -26,7 +26,7 @@ rule mapped_assembly:
 rule minimap:
     input:
         mapped_assembly= "{metagenome}.x.{genome}.mapped.assembly.fa",
-        mapped_reads="../grist/outputs/mapping/{metagenome}.x.{genome}.mapped.fq.gz",
+        mapped_reads="/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/mapping/{metagenome}.x.{genome}.mapped.fq.gz",
         
     output:
         minimap= "{metagenome}.x.{genome}.reads.x.assembly.bam",
@@ -54,7 +54,7 @@ rule samtool:
 # compare total mapped_reads vs. the ones used for assembly, identify diff_reads
 rule diff_output:
     input:
-        mapped_reads="../grist/outputs/mapping/{metagenome}.x.{genome}.mapped.fq.gz",
+        mapped_reads="/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/mapping/{metagenome}.x.{genome}.mapped.fq.gz",
         samfile= "{metagenome}.x.{genome}.reads.x.assembly.fq.gz",
         
     output:
@@ -71,7 +71,7 @@ rule diff_output:
 rule diff_map:
     input:
         diff= "{metagenome}.x.{genome}.diff.fq.gz",
-        mapped_genome="../grist/outputs/genomes/{genome}_genomic.fna.gz",
+        mapped_genome="/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/genomes/{genome}_genomic.fna.gz",
         
     output:
         minimap= "{metagenome}.x.{genome}.diff.reads.x.genome.bam",
@@ -86,7 +86,7 @@ rule diff_map:
 rule assemble_map:
     input:
         assemble= "{metagenome}.x.{genome}.reads.x.assembly.fq.gz",
-        mapped_genome="../grist/outputs/genomes/{genome}_genomic.fna.gz",
+        mapped_genome="/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/genomes/{genome}_genomic.fna.gz",
         
     output:
         minimap= "{metagenome}.x.{genome}.assemble.reads.x.genome.bam",
@@ -126,7 +126,7 @@ rule index:
 # diff_reads csv including coverage
 rule diff2_csv:
     input:
-        bam1= "../grist/outputs/mapping/{metagenome}.x.{genome}.depth.txt",
+        bam1= "/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/mapping/{metagenome}.x.{genome}.depth.txt",
         bam2= "{metagenome}.x.{genome}.diff.reads.x.genome.sort.bam",
         bai2= "{metagenome}.x.{genome}.diff.reads.x.genome.sort.bam.bai",
     output:
@@ -139,9 +139,9 @@ rule diff2_csv:
 # all_reads csv output including the coverage
 rule all_csv:
     input:
-        depth= "../grist/outputs/mapping/{metagenome}.x.{genome}.depth.txt",
-        bam1= "../grist/outputs/mapping/{metagenome}.x.{genome}.sort.bam",
-        bai1= "../grist/outputs/mapping/{metagenome}.x.{genome}.sort.bam.bai",
+        depth= "/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/mapping/{metagenome}.x.{genome}.depth.txt",
+        bam1= "/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/mapping/{metagenome}.x.{genome}.sort.bam",
+        bai1= "/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/mapping/{metagenome}.x.{genome}.sort.bam.bai",
     output:
         csvfile= "{metagenome}.x.{genome}.all.csv",
     conda: "env-diff.yml"
