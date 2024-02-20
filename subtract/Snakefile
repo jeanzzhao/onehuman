@@ -1,3 +1,4 @@
+#replace absolute path with relative path
 PAIRS, = glob_wildcards('../grist/outputs/mapping/{pair}.mapped.fq.gz')
 # then PAIRS would be [ "ERRXYZ.x.genomeABC", "ERRXYZ.x.genomeDEF"]
 print(PAIRS)
