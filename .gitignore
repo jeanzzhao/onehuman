@@ -15,6 +15,7 @@ subtract/*fa
 subtract/*fq.gz
 subtract/*bam
 subtract/*megahit*
+subtract/*bai
 
 outputs.onehuman/*
 human/*

@@ -18,8 +18,8 @@ set -e
 set -x
 
 ### YOUR COMMANDS GO HERE ### Tessa: -
-genome-grist run conf_ERR.yml summarize_gather summarize_mapping --unlock
-genome-grist run conf_ERR.yml summarize_gather summarize_mapping --keep-going --rerun-incomplete --cores 20
+genome-grist run conf.yml summarize_gather summarize_mapping --unlock
+genome-grist run conf.yml summarize_gather summarize_mapping --keep-going --rerun-incomplete --cores 20
 
 # Print out values of the current jobs SLURM environment variables
 env | grep SLURM
