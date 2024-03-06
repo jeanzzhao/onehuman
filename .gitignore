@@ -16,6 +16,11 @@ subtract/*fq.gz
 subtract/*bam
 subtract/*megahit*
 subtract/*bai
+amta/*fq.gz
+amta/*bam
+amta/*bai
+amta/*csv
+amta/.snakemake/
 
 outputs.onehuman/*
 human/*
