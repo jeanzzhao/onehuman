@@ -21,7 +21,7 @@ amta/*bam
 amta/*bai
 amta/*csv
 amta/.snakemake/
+amta/*.tsv
 
-outputs.onehuman/*
 human/*
 git1/*
