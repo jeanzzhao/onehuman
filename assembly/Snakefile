@@ -1,5 +1,5 @@
-# assemble everything in /home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/trim
-SAMPLES, = glob_wildcards('/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/trim/{sample}.trim.fq.gz')
+# assemble everything in ../grist/outputs/trim
+SAMPLES, = glob_wildcards('../grist/outputs/trim/{sample}.trim.fq.gz')
 print(SAMPLES)
 
 rule all:
@@ -9,7 +9,7 @@ rule all:
 
 rule assemble:
     input:
-        "/home/zyzhao/2022-assemblyloss/onehuman/grist/outputs.onehuman/trim/{sample}.trim.fq.gz",
+        "../grist/outputs/trim/{sample}.trim.fq.gz",
     output:
         fagz = "{sample}.megahit.fa.gz",
         dir = directory("{sample}.megahit.d"),
