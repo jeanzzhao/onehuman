@@ -1,0 +1,73 @@
+#map trimmed reads to the metagenome assembly (ma)
+SAMPLES, = glob_wildcards('../grist/outputs/trim/{sample}.trim.fq.gz')
+print(SAMPLES)
+
+rule all:
+    input:
+        expand("{sample}.x.ma.fq.gz", sample=SAMPLES),
+
+# minimap align trimmed reads to the "ma"
+rule minimap:
+    input:
+        assembly= "../assembly/{sample}.megahit.fa.gz",
+        trimmed_reads="../grist/outputs/trim/{sample}.trim.fq.gz",
+        
+    output:
+        minimap= "{sample}.x.ma.bam",
+        
+    conda: "env-diff.yml"
+    threads: 32
+    shell: """
+        minimap2 -ax sr -t 32 {input.assembly} {input.trimmed_reads} | samtools view -b -F 4 - | samtools sort - > {output.minimap}
+    """
+
+# .bam to .fq file
+rule samtool:
+    input:
+        bamfile= "{sample}.x.ma.bam",
+        
+    output:
+        samfile= "{sample}.x.ma.fq.gz",
+        
+    conda: "env-diff.yml"
+    threads: 1
+    shell: """
+        samtools bam2fq {input.bamfile} | gzip -9c > {output.samfile}
+    """    
+
+# sketch reads mapped to assembly
+rule rma_sketch:
+    input:
+       "./{sample}.x.ma.fq.gz",
+    output:
+       rma_sketch= "{sample}.x.ma.fq.gz.sig",
+
+    conda: "env-sourmash.yml"
+    shell: """
+        sourmash sketch dna {input} -o {output.rma_sketch}
+    """
+# sketch genome:
+rule genome_sketch:
+    input:
+        "../grist/outputs/genomes/{sample}_genomic.fna.gz",
+    output:
+        genome_sketch= "{sample}.sig",
+
+    conda: "env-sourmash.yml"
+    shell: """
+        sourmash sketch dna {input} -o {output.genome_sketch}
+    """
+
+# Calculate containment
+rule calc_containment:
+    input:
+        rma_sig="{sample}.x.ma.fq.gz.sig",
+        genome_sig="{sample}.sig",
+    output:
+        p_rma_containment= "{sample}.rma.containment.csv",
+
+    conda: "env-sourmash.yml"
+    threads: 1
+    shell: """
+        sourmash search --containment {input.genome_sig} {input.rma_sig} -o {output.p_rma_containment}
+    """
