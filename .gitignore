@@ -22,7 +22,8 @@ amta/*bai
 amta/*csv
 amta/.snakemake/
 amta/*.tsv
-
+atta/*.bam
+atta/*.fq.gz
 human/*
 git1/*
 outputs.onehuman/*

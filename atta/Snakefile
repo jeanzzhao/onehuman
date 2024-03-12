@@ -4,7 +4,7 @@ print(SAMPLES)
 
 rule all:
     input:
-        expand("{sample}.x.ma.fq.gz", sample=SAMPLES),
+        expand("{sample}.rma.containment.csv", sample=SAMPLES),
 
 # minimap align trimmed reads to the "ma"
 rule minimap:
