@@ -1,20 +1,19 @@
 #map trimmed reads to the metagenome assembly (ma)
+#compare trimmed read with reads mapped to metagenome assembly
 SAMPLES, = glob_wildcards('../grist/outputs/trim/{sample}.trim.fq.gz')
 print(SAMPLES)
 
 rule all:
     input:
-        expand("{sample}.rma.containment.csv", sample=SAMPLES),
+        expand("{sample}.trim.rma.csv", sample=SAMPLES),
 
 # minimap align trimmed reads to the "ma"
 rule minimap:
     input:
         assembly= "../assembly/{sample}.megahit.fa.gz",
         trimmed_reads="../grist/outputs/trim/{sample}.trim.fq.gz",
-        
     output:
         minimap= "{sample}.x.ma.bam",
-        
     conda: "env-diff.yml"
     threads: 32
     shell: """
@@ -25,10 +24,8 @@ rule minimap:
 rule samtool:
     input:
         bamfile= "{sample}.x.ma.bam",
-        
     output:
         samfile= "{sample}.x.ma.fq.gz",
-        
     conda: "env-diff.yml"
     threads: 1
     shell: """
@@ -38,7 +35,7 @@ rule samtool:
 # sketch reads mapped to assembly
 rule rma_sketch:
     input:
-       "./{sample}.x.ma.fq.gz",
+       "{sample}.x.ma.fq.gz",
     output:
        rma_sketch= "{sample}.x.ma.fq.gz.sig",
 
@@ -46,28 +43,38 @@ rule rma_sketch:
     shell: """
         sourmash sketch dna {input} -o {output.rma_sketch}
     """
-# sketch genome:
-rule genome_sketch:
-    input:
-        "../grist/outputs/genomes/{sample}_genomic.fna.gz",
-    output:
-        genome_sketch= "{sample}.sig",
 
+# sketch all trimmed reads
+rule trim_sketch:
+    input:
+       "../grist/outputs/trim/{sample}.trim.fq.gz",
+    output:
+       trim_sketch= "{sample}.trim.fq.gz.sig",
     conda: "env-sourmash.yml"
     shell: """
-        sourmash sketch dna {input} -o {output.genome_sketch}
+        sourmash sketch dna {input} -o {output.trim_sketch}
     """
+
+# sketch genome:
+#rule genome_sketch:
+#    input:
+#        "../grist/outputs/genomes/{sample}_genomic.fna.gz",
+#    output:
+#        genome_sketch= "{sample}.sig",
+#    conda: "env-sourmash.yml"
+#    shell: """
+#        sourmash sketch dna {input} -o {output.genome_sketch}
+#    """
 
 # Calculate containment
 rule calc_containment:
     input:
         rma_sig="{sample}.x.ma.fq.gz.sig",
-        genome_sig="{sample}.sig",
+        trim_sig="{sample}.trim.fq.gz.sig",
     output:
-        p_rma_containment= "{sample}.rma.containment.csv",
-
+        p_trim_rma_containment= "{sample}.trim.rma.csv",
     conda: "env-sourmash.yml"
     threads: 1
     shell: """
-        sourmash search --containment {input.genome_sig} {input.rma_sig} -o {output.p_rma_containment}
+        sourmash search --containment {input.trim_sig} {input.rma_sig} -o {output.p_trim_rma_containment}
     """
