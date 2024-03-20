@@ -16,7 +16,7 @@ rule trim_containment:
         genome_sig = "../grist/outputs/genomes/{genome}_genomic.sig",
     output:
         trim_csv= "{metagenome}.x.{genome}.trim.csv",
-    conda: "../assembly/env-sourmash.yml"
+    conda: "env-diff.yml"
     threads: 1
     shell: """
        sourmash search --containment {input.genome_sig} {input.trim_sig} -o {output}
@@ -28,7 +28,7 @@ rule assem_containment:
         genome_sig = "../grist/outputs/genomes/{genome}_genomic.sig",
     output:
         assem_csv= "{metagenome}.x.{genome}.assem.csv",
-    conda: "../assembly/env-sourmash.yml"
+    conda: "env-diff.yml"
     threads: 1
     shell: """
        sourmash search --containment {input.genome_sig} {input.assem_sig} -o {output}
@@ -39,8 +39,8 @@ rule mapassem_containment:
         mapassem_sig = "{metagenome}.x.ma.fq.gz.sig",
         genome_sig = "../grist/outputs/genomes/{genome}_genomic.sig",
     output:
-        assem_csv= "{metagenome}.x.{genome}.assem.csv",
-    conda: "../assembly/env-sourmash.yml"
+        mapassem_csv= "{metagenome}.x.{genome}.mapassem.csv",
+    conda: "env-diff.yml"
     threads: 1
     shell: """
        sourmash search --containment {input.genome_sig} {input.mapassem_sig} -o {output}
@@ -53,10 +53,10 @@ rule minimap:
         trimmed_reads="../grist/outputs/trim/{metagenome}.trim.fq.gz",
     output:
         minimap= "{metagenome}.x.ma.bam",
-    conda: "../assembly/env-diff.yml"
-    threads: 32
+    conda: "env-diff.yml"
+    threads: 16
     shell: """
-        minimap2 -ax sr -t 32 {input.assembly} {input.trimmed_reads} | samtools view -b -F 4 - | samtools sort - > {output.minimap}
+        minimap2 -ax sr -t 16 {input.assembly} {input.trimmed_reads} | samtools view -b -F 4 - | samtools sort - > {output.minimap}
     """
 
 # .bam to .fq file
@@ -78,7 +78,7 @@ rule mapassem_sketch:
     output:
        mapassem_sketch= "{metagenome}.x.ma.fq.gz.sig",
 
-    conda: "env-sourmash.yml"
+    conda: "env-diff.yml"
     shell: """
         sourmash sketch dna {input} -o {output}
     """
@@ -88,7 +88,18 @@ rule trim_sketch:
        trim_reads="../grist/outputs/trim/{metagenome}.trim.fq.gz",
     output:
        trim_sketch= "../grist/outputs/trim/{metagenome}.trim.fq.gz.sig",
-    conda: "env-sourmash.yml"
+    conda: "env-diff.yml"
+    shell: """
+        sourmash sketch dna {input} -o {output}
+    """
+
+# sketch genomes
+rule genome_sketch:
+    input:
+        genome= "../grist/outputs/genomes/{genome}_genomic.fna.gz",
+    output:
+        genome_sketch= "../grist/outputs/genomes/{genome}_genomic.sig",
+    conda: "env-diff.yml"
     shell: """
         sourmash sketch dna {input} -o {output}
     """
