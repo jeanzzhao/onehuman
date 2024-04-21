@@ -1,15 +1,21 @@
-PAIRS, = glob_wildcards('../grist/outputs/mapping/{pair}.mapped.fq.gz')
-# then PAIRS would be [ "ERRXYZ.x.genomeABC", "ERRXYZ.x.genomeDEF"]
-print(PAIRS)
+split_pairs_wc = glob_wildcards('../grist/outputs/mapping/{metagenome}.x.{genome}.mapped.fq.gz')
+metagenomes = set(split_pairs_wc.metagenome)
+print('METAGENOMES:', metagenomes)
 
-# containment search each genome in:
-# 1) raw metagenome, 2) assembled metagenome, 3) the reads mapped to the assembled metagenome
 rule all:
     input:
-        expand("{pair}.trim.csv", pair=PAIRS),
-        expand("{pair}.assem.csv", pair=PAIRS),
-        expand("{pair}.mapassem.csv", pair=PAIRS),
-    
+        expand("{metagenomes}.out.csv", metagenomes=metagenomes),
+
+rule out_csv:
+    input:
+        summary_csv= "../grist/outputs/mapping/{metagenome}.summary.csv",
+    output:
+        csvfile= "{metagenome}.out.csv",
+    conda: "env-diff.yml"
+    threads: 1
+    shell: """
+    ./join-summary-with-assemloss.py {input.summary_csv} ./ -o {output}
+    """
 rule trim_containment:
     input:
         trim_sig = "../grist/outputs/trim/{metagenome}.trim.fq.gz.sig",
@@ -19,7 +25,7 @@ rule trim_containment:
     conda: "env-diff.yml"
     threads: 1
     shell: """
-       sourmash search --containment {input.genome_sig} {input.trim_sig} -o {output}
+       sourmash search --containment {input.genome_sig} {input.trim_sig} -o {output} --threshold=0
     """
 
 rule assem_containment:
@@ -31,7 +37,7 @@ rule assem_containment:
     conda: "env-diff.yml"
     threads: 1
     shell: """
-       sourmash search --containment {input.genome_sig} {input.assem_sig} -o {output}
+       sourmash search --containment {input.genome_sig} {input.assem_sig} -o {output} --threshold=0
     """
 
 rule mapassem_containment:
@@ -43,7 +49,7 @@ rule mapassem_containment:
     conda: "env-diff.yml"
     threads: 1
     shell: """
-       sourmash search --containment {input.genome_sig} {input.mapassem_sig} -o {output}
+       sourmash search --containment {input.genome_sig} {input.mapassem_sig} -o {output} --threshold=0
     """
 
 # minimap align trimmed reads to the "ma"

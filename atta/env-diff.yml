@@ -10,3 +10,5 @@ dependencies:
     - screed
     - pysam=0.21
     - sourmash=4.8.5
+    - pandas
+
