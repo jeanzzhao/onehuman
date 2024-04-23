@@ -5,6 +5,22 @@ import argparse
 import glob
 
 
+def get_single_glob_match(pattern):
+    matches = glob.glob(pattern)
+    if not matches:
+        print(f"No matches to glob pattern '{pattern}'; are files missing?!",
+              file=sys.stderr)
+        raise Exception
+    elif len(matches) > 1:
+        print(f"Too many matches to glob pattern '{pattern}'; what's up?",
+              file=sys.stderr)
+        print(matches)
+        raise Exception
+    else:
+        assert len(matches) == 1
+        return matches[0]
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('grist_summary_csv')
@@ -25,13 +41,14 @@ def main():
     all_accs = []
     for acc in accessions:
         print(f'globbing on {acc}')
-        trim_pattern = f'{args.atta_directory}/{sample_id}.x.{acc}.*.trim.csv'
-        assem_pattern = f'{args.atta_directory}/{sample_id}.x.{acc}.*.assem.csv'
-        mapassem_pattern = f'{args.atta_directory}/{sample_id}.x.{acc}.*.mapassem.csv'
+        base_pattern = f'{args.atta_directory}/{sample_id}.x.{acc}.*'
+        trim_pattern = base_pattern + '.trim.csv'
+        assem_pattern = base_pattern + '.assem.csv'
+        mapassem_pattern = base_pattern + '.mapassem.csv'
 
-        trim_csv = glob.glob(trim_pattern)[0]
-        assem_csv = glob.glob(assem_pattern)[0]
-        mapassem_csv = glob.glob(mapassem_pattern)[0]
+        trim_csv = get_single_glob_match(trim_pattern)
+        assem_csv = get_single_glob_match(assem_pattern)
+        mapassem_csv = get_single_glob_match(mapassem_pattern)
 
         try:
             df1 = pd.read_csv(trim_csv)
